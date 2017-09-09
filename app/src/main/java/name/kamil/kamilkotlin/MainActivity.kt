@@ -1,5 +1,7 @@
 package name.kamil.kamilkotlin
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
@@ -8,8 +10,15 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ListView
+import android.widget.Toast
 
 class MainActivity : AppCompatActivity() {
+
+    companion object  {
+        val EXTRA_STRING = "name.kamil.extra_string"
+        val REQUEST_CODE = 200
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         val fab = findViewById<View>(R.id.fab) as FloatingActionButton
-        fab.setOnClickListener { view -> addExpenseElement(view) }
+        fab.setOnClickListener { view -> showAddExpenseActivity(view) }
 
         val listView = findViewById<ListView>(R.id.ListView)
         listView.adapter = ExpenseRecordAdapter(this)
@@ -37,7 +46,6 @@ class MainActivity : AppCompatActivity() {
         // as you specify a parent activity in AndroidManifest.xml.
         val id = item.itemId
 
-
         if (id == R.id.action_settings) {
             return true
         }
@@ -45,10 +53,29 @@ class MainActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun addExpenseElement(view : View) {
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE ) {
+
+            val category = data.extras.getString("kategoria")
+            val price = data.extras.getFloat("cena")
+            Toast.makeText(this,category, Toast.LENGTH_SHORT).show()
+
+            addExpenseElement(category, price)
+        }
+    }
+
+    private fun addExpenseElement(category: String, price: Float) {
         val listView = findViewById<ListView>(R.id.ListView)
         val adapter = listView.adapter as ExpenseRecordAdapter
-        adapter.add(ExpenseRecord("Record", 2.40f))
+        adapter.add(ExpenseRecord(category, price))
+    }
+
+
+    private fun showAddExpenseActivity(view : View) {
+        val intent = Intent(this, AddExpenseActivity::class.java)
+        startActivityForResult(intent,  REQUEST_CODE)
     }
 
 }
